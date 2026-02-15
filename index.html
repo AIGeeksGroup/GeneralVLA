@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>GeneralVLA: Generalizable Vision-Language-Action Models with Knowledge-Guided Trajectory Planning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="GeneralVLA: Generalizable Vision-Language-Action Models with Knowledge-Guided Trajectory Planning" />
+    <meta
+      property="og:description"
+      content="Video models like Veo 3 are on a path to become vision foundation models."
+    />
+    <meta property="og:image" content="https://video-zero-shot.github.io/assets/preview.png" />
+    <meta property="og:url" content="https://video-zero-shot.github.io/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Favicon -->
+    <!-- <link rel="icon" type="image/png" href="assets/duckie.png" /> -->
+
+    <!-- Import FontAwesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <style>
+      :root {
+        --text-primary: #333;
+        --text-secondary: #666;
+        --background-primary: #fff;
+        --background-secondary: #f9f9f9;
+        --border-color: #ccc;
+        --google-blue: #1a73e8;
+        --google-red: #d93025;
+        --google-yellow: #f9ab00;
+        --google-green: #1e8e3e;
+        --perception-color: var(--google-blue);
+        --modeling-color: #925bcf;
+        --manipulation-color: #c440a7;
+        --reasoning-color: #da2f77;
+        --failure-color: black;
+      }
+      .blue {
+        color: var(--google-blue);
+      }
+      .red {
+        color: var(--google-red);
+      }
+      .yellow {
+        color: var(--google-yellow);
+      }
+      .green {
+        color: var(--google-green);
+      }
+      .perception-color {
+        color: var(--perception-color);
+      }
+      .modeling-color {
+        color: var(--modeling-color);
+      }
+      .manipulation-color {
+        color: var(--manipulation-color);
+      }
+      .reasoning-color {
+        color: var(--reasoning-color);
+      }
+      .failure-color {
+        color: var(--failure-color);
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        color: var(--text-primary);
+        text-align: center;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background: var(--background-primary);
+      }
+
+      /* Display content as a centered column */
+      .content-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--background-primary);
+        position: relative;
+        z-index: 1;
+        box-sizing: border-box;
+      }
+
+      header {
+        padding: 1.5rem 1rem;
+        margin-top: 30px;
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin: 0 0 0.75rem;
+        line-height: 1.2;
+        font-weight: 700;
+      }
+
+      .gradient-title {
+        background: linear-gradient(135deg, #8e3bff, #c088ff);
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+
+      .authors {
+        margin-top: 0.5rem;
+      }
+
+      .authors a {
+        text-decoration: none;
+        color: var(--google-blue);
+        display: inline-block;
+        margin-right: 0.6rem;
+      }
+
+      .authors a:last-of-type {
+        margin-right: 0;
+      }
+
+      .authors sup {
+        font-size: 0.85em;
+        line-height: 1;
+        position: relative;
+        top: -0.18rem;
+        margin-left: 0.08rem;
+      }
+
+      .affiliations {
+        color: var(--text-secondary);
+        margin-top: 0.75rem;
+      }
+
+      .affiliations span {
+        display: inline;
+        margin: 0 0.6rem 0 0;
+        padding: 0;
+      }
+
+      .affiliations span:last-of-type {
+        margin-right: 0;
+      }
+
+      .asterisk-note {
+        font-style: italic;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        display: block;
+        margin-top: 0.5rem;
+      }
+
+      .button-wrapper {
+        margin: 2rem auto;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .btn-link {
+        display: flex;
+        align-items: center;
+        background: var(--text-primary);
+        color: var(--background-primary);
+        text-decoration: none;
+        border-radius: 9999px;
+        padding: 0.5rem 1rem;
+        transition: background 0.2s ease-in-out;
+        font-weight: 500;
+        border: none;
+      }
+
+      .btn-link:hover {
+        background: var(--google-blue);
+      }
+
+      .logo {
+        width: 20px;
+        height: auto;
+      }
+
+      .btn-link i,
+      .btn-link .logo {
+        margin-right: 0.5rem;
+      }
+
+      .text-section {
+        margin: 2rem 0;
+        padding: 0 1rem;
+        text-align: justify;
+      }
+
+      .text-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      .text-section p {
+        line-height: 1.6;
+        margin-bottom: 1rem;
+      }
+
+      .method-overview {
+        width: 90%;
+        max-width: 1100px;
+        margin: 2rem auto 3rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .method-visual {
+        flex: 1 1 320px;
+        min-width: 280px;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      }
+
+      .method-visual img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .method-visual figcaption {
+        margin: 0;
+        padding: 0.5rem 0;
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .method-copy {
+        flex: 1 1 320px;
+        min-width: 280px;
+        text-align: left;
+      }
+
+      .method-copy h3 {
+        margin-top: 0;
+        font-size: 1.35rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .method-copy p {
+        line-height: 1.7;
+        margin: 0;
+      }
+
+      .real-world-section {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto 2rem;
+        padding: 0;
+      }
+
+      .real-world-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(220px, 1fr));
+        gap: 0.5rem;
+      }
+
+      .simulation-section {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto 2rem;
+        padding: 0;
+      }
+
+      .simulation-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+        gap: 0.5rem;
+      }
+
+      @media (max-width: 1200px) {
+        .simulation-grid {
+          grid-template-columns: repeat(2, minmax(200px, 1fr));
+        }
+      }
+
+      @media (max-width: 1100px) {
+        .real-world-grid {
+          grid-template-columns: repeat(2, minmax(200px, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .real-world-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .real-world-video {
+        background: none;
+        padding: 0;
+        text-align: center;
+        margin: 0;
+      }
+
+      .simulation-video {
+        background: none;
+        padding: 0;
+        text-align: center;
+        margin: 0;
+      }
+
+      .real-world-video video {
+        width: 100%;
+        height: auto;
+        border-radius: 0;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        display: block;
+      }
+
+      .real-world-video figcaption,
+      .simulation-video figcaption {
+        margin-top: 0.15rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+      }
+
+      .simulation-video img {
+        width: 100%;
+        height: auto;
+        border-radius: 0;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        display: block;
+      }
+
+      .overview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        width: 90%;
+        max-width: 1200px;
+        margin: 2rem auto;
+        justify-content: center;
+        align-items: start;
+      }
+
+      .overview-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        flex: 1 1 100px;
+      }
+
+      .overview-videos {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .video-wrapper {
+        position: relative;
+      }
+
+      video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 8px;
+        border: 1px solid var(--text-primary);
+        overflow: hidden;
+      }
+
+      .overview-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin: 0;
+      }
+
+      #podcast-section {
+        text-align: center;
+      }
+
+      .section-header {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      .video-grid {
+        display: grid;
+        /* Creates 3 columns of equal width (1 fraction) */
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px; /* Space between the videos */
+        width: 90%; /* Adjust to your preferred width */
+        max-width: 1200px; /* Max width for large screens */
+        margin: 40px auto; /* Center the grid on the page */
+      }
+
+      .video-title {
+        text-align: center;
+        margin-top: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      /* Responsive adjustments for grids */
+      @media (max-width: 768px) {
+        /* Change to 1 column on tablets/smaller devices */
+        .overview-column {
+          flex-basis: 100%;
+        }
+
+        .overview-videos {
+          flex-direction: row;
+        }
+
+        /* Change to 2 columns on tablets/smaller devices */
+        .video-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 480px) {
+        /* Remove title break on mobile devices */
+        .title-break {
+          display: none;
+        }
+
+        /* Change to 1 column on mobile phones */
+        .video-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      footer {
+        margin: 2rem 0;
+        color: var(--text-secondary);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .citation-box {
+        background: var(--background-secondary);
+        border: 1px solid var(--border-color);
+        text-align: left;
+        border-radius: 5px;
+        padding: 1rem;
+        position: relative;
+      }
+
+      .citation-pre {
+        margin: 0;
+        font-family: monospace;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .citation-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: var(--border-color);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content-wrapper">
+      <header>
+        <h1><span class="gradient-title">GeneralVLA:</span> Generalizable Vision-Language-Action Models with Knowledge-Guided Trajectory Planning</h1>
+        <!-- <h2>Conference 2026</h2> -->
+
+        <div class="authors">
+          <a href="#">Guoqing Ma<sup>1*</sup></a>
+          <a href="#">Siheng Wang<sup>2*</sup></a>
+          <a href="https://steve-zeyu-zhang.github.io/">Zeyu Zhang<sup>2*†</sup></a>
+          <a href="#">Shan Yu<sup>1</sup></a>
+          <a href="#">Hao Tang<sup>2‡</sup></a>
+        </div>
+        <div class="affiliations">
+          <span class="black"><sup>1</sup>CASIA</span>
+          <span class="black"><sup>2</sup>Peking University</span>
+        </div>
+        <div class="asterisk-note">
+          <sup>*</sup>Equal contribution.
+          <sup>†</sup>Project lead.
+          <sup>‡</sup>Corresponding author.
+        </div>
+
+              <div class="button-wrapper">
+        <a
+          class="btn-link"
+          href="https://arxiv.org/abs/2602.04315"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img src="assets/arxiv_transparent.png" alt="arXiv Logo" class="logo" />Paper
+        </a>
+        <a
+          class="btn-link"
+          href="https://github.com/AIGeeksGroup/GeneralVLA"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i class="fa-brands fa-github"></i>GitHub
+        </a>
+        <a class="btn-link" href="https://huggingface.co/AIGeeksGroup/GeneralVLA">
+          <i class="fa-solid fa-headphones"></i>Model
+        </a>
+      </div>
+      </header>
+
+      <div class="text-section">
+        <h2>TL;DR</h2>
+        <p>
+          GeneralVLA design integrates ASM and Knowledge-Guided Trajectory Planning for generalizable zero-shot robotic manipulation and scalable demonstration-free data generation across tasks.
+        </p>
+      </div>
+    </div>
+
+
+    <div class="content-wrapper">
+      <div class="text-section">
+        <h2>Real World Results</h2>
+        <p>Selected real-world episodes (videos 7–10) showcase the model acting in unconstrained physical settings. Each clip is labeled beneath the footage for quick reference.</p>
+      </div>
+    </div>
+
+    <div class="real-world-section">
+      <div class="real-world-grid">
+        <figure class="real-world-video">
+          <video autoplay loop muted playsinline preload="auto" src="generalvla_video/7move_bottle.mp4"></video>
+          <figcaption>Pick up the spray bottle and place it on the blue pad, taking into account the bottle's height during handling.</figcaption>
+        </figure>
+        <figure class="real-world-video">
+          <video autoplay loop muted playsinline preload="auto" src="generalvla_video/8open_drawer.mp4"></video>
+          <figcaption>Open the drawer using its handle, and be mindful of the correct direction for opening.</figcaption>
+        </figure>
+        <figure class="real-world-video">
+          <video autoplay loop muted playsinline preload="auto" src="generalvla_video/9open_jar.mp4"></video>
+          <figcaption>Uncap the transparent bottle.</figcaption>
+        </figure>
+        <figure class="real-world-video">
+          <video autoplay loop muted playsinline preload="auto" src="generalvla_video/10pick_cabbage.mp4"></video>
+          <figcaption>Pick up the cabbage and place it into the box.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="text-section">
+        <h2>Simulation Results</h2>
+        <p>Controlled simulation episodes (clips 1–6) highlight the model’s behavior in the virtual testbed, with motion traces rendered as GIFs for quick comparison.</p>
+      </div>
+    </div>
+
+    <div class="simulation-section">
+      <div class="simulation-grid">
+        <figure class="simulation-video">
+          <img src="generalvla_video/1play_jenga.gif" alt="Play Jenga simulation" />
+          <figcaption>Pull out the Jenga block carefully, ensuring to note and apply the correct direction of pull.</figcaption>
+        </figure>
+        <figure class="simulation-video">
+          <img src="generalvla_video/2lamp_on.gif" alt="Lamp on simulation" />
+          <figcaption>Turn on the lamp. Press the green button to power it on.</figcaption>
+        </figure>
+        <figure class="simulation-video">
+          <img src="generalvla_video/3pick_up_cup.gif" alt="Pick up cup simulation" />
+          <figcaption>Pick up the red cup by grasping its edge securely.</figcaption>
+        </figure>
+        <figure class="simulation-video">
+          <img src="generalvla_video/4open_jar.gif" alt="Open jar simulation" />
+          <figcaption>Uncap the red jar and place its cap on the green area.</figcaption>
+        </figure>
+        <figure class="simulation-video">
+          <img src="generalvla_video/5push_buttons.gif" alt="Push buttons simulation" />
+          <figcaption>Press the button located on the red pad.</figcaption>
+        </figure>
+        <figure class="simulation-video">
+          <img src="generalvla_video/6stack_blocks.gif" alt="Stack blocks simulation" />
+          <figcaption>Stack the two blocks together within the green area, aligning them carefully while considering their height for stability.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="text-section">
+        <h2>Method</h2>
+        <p> </p>
+      </div>
+    </div>
+
+    <div class="method-overview">
+      <figure class="method-visual">
+        <img src="assets/teaser_page-0001.jpg" alt="GeneralVLA overview illustration" />
+        <figcaption>Overview of GeneralVLA, VLAs and earlier imitation learning methods. GeneralVLA’s hierarchical design results in better generalization. It enables 3D trajectory planning framework that fully exploits the prior knowledge of foundation models.</figcaption>
+      </figure>
+    </div>
+
+    <div class="method-overview">
+      <figure class="method-visual">
+        <img src="assets/pipeline_page-0001.jpg" alt="GeneralVLA inference pipeline" />
+        <figcaption>Inference workflow of GeneralVLA. (a) The high-level ASM is called to generate the 2D points and corresponding semantic information. (b) The mid-level Knowledge-Guided Trajectory Planning carries out task understanding, 3D reasoning and planning to produce a 3D path indicating the desired robot end-effector trajectory. (c) The intermediate 3D path prediction is then served as guidance to the low-level, 3D-aware control policy enhanced by HGM for precise manipulation.</figcaption>
+      </figure>
+    </div>
+
+    <div class="method-overview">
+      <figure class="method-visual">
+        <img src="assets/detailed_pipeline_page-0001.jpg" alt="ASM and 3DAgent framework" />
+        <figcaption>Detailed framework of ASM and 3DAgent. (a) Given the input image and task text as query, the multimodal LLM (e.g., LLaVA [36]) generates text output. The last-layer embedding for the &lt;SEG&gt; token is then decoded into the segmentation mask via the decoder. We use LoRA [19] for efficient fine-tuning. The choice of vision backbone can be flexible (e.g., SAM3 [7]).</figcaption>
+      </figure>
+    </div>
+
+
+    <div class="content-wrapper">
+      <div class="citation-section">
+        <h2>BibTeX</h2>
+        <div class="citation-box">
+          <pre id="citation-text" class="citation-pre">
+@article{ma2026generalvla,
+  title={GeneralVLA: Generalizable Vision-Language-Action Models with Knowledge-Guided Trajectory Planning},
+  author={Ma, Guoqing and Wang, Siheng and Zhang, Zeyu and Yu, Shan and Tang, Hao},
+  journal={arXiv preprint arXiv:2602.04315},
+  year={2026}
+}</pre
+          >
+          <button onclick="copyCitation()" class="citation-button" title="Copy to clipboard">
+            <i class="fa-regular fa-copy"></i>
+          </button>
+        </div>
+      </div>
+
+      <script>
+        function copyCitation() {
+          const citationText = document.getElementById('citation-text').innerText; // Get the citation text
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            // Modern method using Clipboard API
+            navigator.clipboard
+              .writeText(citationText)
+
+              .catch(() => {
+                fallbackCopy(citationText);
+              });
+          } else {
+            // Fallback method
+            fallbackCopy(citationText);
+          }
+        }
+
+        function fallbackCopy(text) {
+          // Create a temporary textarea element
+          const textArea = document.createElement('textarea');
+          textArea.value = text;
+          document.body.appendChild(textArea);
+          textArea.select();
+          try {
+            document.execCommand('copy'); // Fallback to execCommand
+          } catch (err) {
+            // Cannot use alert()
+            console.error('Failed to copy citation.');
+          }
+          document.body.removeChild(textArea); // Clean up
+        }
+      </script>
+
+      <script>
+        const failureToggle = document.getElementById('failure-toggle');
+        const failureGrid = document.getElementById('failure-grid');
+        const failureArrow = document.getElementById('failure-arrow');
+        let videosLoaded = false;
+
+        failureToggle.addEventListener('click', () => {
+          const isHidden = failureGrid.style.display === 'none';
+          if (isHidden) {
+            failureGrid.style.display = 'grid';
+            failureArrow.textContent = '▼';
+            if (!videosLoaded) {
+              const videos = failureGrid.querySelectorAll('video[data-src]');
+              videos.forEach((video) => {
+                video.src = video.getAttribute('data-src');
+              });
+              videosLoaded = true;
+            }
+          } else {
+            failureGrid.style.display = 'none';
+            failureArrow.textContent = '▶';
+          }
+        });
+      </script>
+
+      <footer>
+        GeneralVLA: Generalizable Vision-Language-Action Models with Knowledge-Guided Trajectory Planning
+      </footer>
+    </div>
+  </body>
+</html>

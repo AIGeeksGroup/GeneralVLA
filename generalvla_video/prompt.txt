@@ -1,0 +1,11 @@
+1play_jenga: Pull out the Jenga block carefully, ensuring to note and apply the correct direction of pull.
+2lamp_on: Turn on the lamp. Press the green button to power it on.
+3pick_up_cup: Pick up the red cup by grasping its edge securely.
+4open_jar: Uncap the red jar and place its cap on the green area.
+5push_buttons: Press the button located on the red pad.
+6stack_blocks: Stack the two blocks together within the green area, aligning them carefully while considering their height for stability.
+7move_bottle: Pick up the spray bottle and place it on the blue pad, taking into account the bottle's height during handling.
+8open_drawer: Open the drawer using its handle, and be mindful of the correct direction for opening.
+9open_jar:  Uncap the transparent bottle.
+10pick_cabbage: Pick up the cabbage and place it into the box.
+
