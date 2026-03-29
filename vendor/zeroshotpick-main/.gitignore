@@ -1,0 +1,42 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# 本地生成与调试输出
+outputs/
+click_frames/
+
+# 脚本生成的测试图像（根目录及 data/）
+depth.png
+rgb.jpg
+rgb.png
+data/depth.png
+data/rgb.png
+
+# 临时/未命名文件
+Untitled
+*.swp
+*.swo
+*~
+
+# 环境与密钥（勿提交 API Key）
+.env
+.env.local
+*.pem
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# 大模型权重等（按需取消注释）
+# *.pt
+# *.tar
+# *.pth

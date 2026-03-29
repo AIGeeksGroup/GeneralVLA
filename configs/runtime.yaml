@@ -1,0 +1,4 @@
+data_root: data
+memory_path: data/memories/robot_tasks.jsonl
+top_k: 3
+require_operator_confirmation: true

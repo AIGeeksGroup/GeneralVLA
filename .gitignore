@@ -1,0 +1,14 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+
+data/
+!data/.gitkeep
+
+vendor/GeneralVLA/pretrain_model/
+external/graspnet/logs/
+
+src/*.egg-info/
+src/**/*.egg-info/

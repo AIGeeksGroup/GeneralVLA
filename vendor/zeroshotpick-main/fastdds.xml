@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Fast DDS 配置：跨机 10.5.20.132 <-> 10.5.23.176。
+  大消息（如 compressedDepth ~188KB）在 UDP 下会分片，易受丢包影响导致收帧不稳。
+  建议：发布端与订阅端都使用本配置（或对称配置），以便可用 TCP 传数据，提高稳定性。
+  使用：export FASTRTPS_DEFAULT_PROFILES_FILE=/path/to/fastdds.xml
+-->
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+    <transport_descriptors>
+        <!-- UDP：发现与小消息；缓冲 2MB（OS 常限制更大值无效），显式分片上限 -->
+        <transport_descriptor>
+            <transport_id>udpv4_transport</transport_id>
+            <type>UDPv4</type>
+            <sendBufferSize>2097152</sendBufferSize>
+            <receiveBufferSize>2097152</receiveBufferSize>
+            <maxMessageSize>65500</maxMessageSize>
+            <interfaceWhiteList>
+                <address>10.5.20.132</address>
+            </interfaceWhiteList>
+        </transport_descriptor>
+        <!-- TCP：大消息用 TCP 可避免 UDP 分片丢包，需对端也起 TCP 并加入 initialPeers -->
+        <transport_descriptor>
+            <transport_id>tcpv4_transport</transport_id>
+            <type>TCPv4</type>
+            <sendBufferSize>2097152</sendBufferSize>
+            <receiveBufferSize>2097152</receiveBufferSize>
+            <listening_ports>
+                <port>5100</port>
+            </listening_ports>
+            <interfaceWhiteList>
+                <address>10.5.20.132</address>
+            </interfaceWhiteList>
+            <enable_tcp_nodelay>true</enable_tcp_nodelay>
+        </transport_descriptor>
+    </transport_descriptors>
+
+    <participant profile_name="participant_profile" is_default_profile="true">
+        <rtps>
+            <userTransports>
+                <transport_id>udpv4_transport</transport_id>
+                <transport_id>tcpv4_transport</transport_id>
+            </userTransports>
+            <useBuiltinTransports>false</useBuiltinTransports>
+            <builtin>
+                <metatrafficUnicastLocatorList>
+                    <locator/>
+                </metatrafficUnicastLocatorList>
+                <initialPeersList>
+                    <locator>
+                        <udpv4>
+                            <address>10.5.23.176</address>
+                        </udpv4>
+                    </locator>
+                    <locator>
+                        <tcpv4>
+                            <address>10.5.23.176</address>
+                            <physical_port>5100</physical_port>
+                        </tcpv4>
+                    </locator>
+                </initialPeersList>
+            </builtin>
+        </rtps>
+    </participant>
+</profiles>

@@ -1,0 +1,15 @@
+reasoning_bank_root: vendor/reasoning-bank
+generalvla_root: vendor/GeneralVLA
+zeroshotpick_root: vendor/zeroshotpick-main
+generalvla_vis_save_path: data/vis
+retrieval_backend: simple
+generalvla_lisa_version: vendor/GeneralVLA/pretrain_model/LISA-7B-v1-explanatory
+generalvla_segagent_version: vendor/GeneralVLA/pretrain_model/segagent/zzzmmz/SegAgent-Model
+generalvla_simpleclick_checkpoint: vendor/GeneralVLA/pretrain_model/sam_vit_h_4b8939.pth
+generalvla_grounding_model: qwen-full
+generalvla_seg_model: sam_h
+generalvla_precision: fp16
+generalvla_device: cuda:0
+generalvla_load_in_4bit: true
+zeroshotpick_graspnet_root: external/graspnet
+zeroshotpick_graspnet_checkpoint_path: external/graspnet/logs/log_rs/checkpoint-rs.tar
