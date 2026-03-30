@@ -28,25 +28,30 @@ python -m pip install -e '.[dev]'
 
 ## 3. Download Assets
 
-To download or localize model assets:
+GitHub stores code only. Pretrained models and checkpoints are hosted on Hugging Face:
+
+- `https://huggingface.co/AIGeeksGroup/GeneralVLA`
+
+To fetch repository-local model assets:
 
 ```bash
 cd <repo-root>
-export GENERALVLA_PRETRAIN_SOURCE=/path/to/existing/pretrain_model  # optional
-bash scripts/download_assets.sh
+git clone https://huggingface.co/AIGeeksGroup/GeneralVLA vendor/GeneralVLA/pretrain_model
 ```
 
-The script populates repository-local paths such as:
+If you already have a local copy of the assets, place them under:
 
 - `vendor/GeneralVLA/pretrain_model/LISA-7B-v1-explanatory`
 - `vendor/GeneralVLA/pretrain_model/segagent/zzzmmz/SegAgent-Model`
 - `vendor/GeneralVLA/pretrain_model/sam_vit_h_4b8939.pth`
 - `vendor/GeneralVLA/pretrain_model/clip-vit-large-patch14`
+- `vendor/GeneralVLA/pretrain_model/checkpoints/v1/checkpoint-rs.tar`
 
 Notes:
 
 - these files are large and require enough disk space
-- if disk space is insufficient, the script will fail and `preflight` will continue reporting missing assets
+- `scripts/download_assets.sh` clones the same Hugging Face repository into `vendor/GeneralVLA/pretrain_model`
+- `configs/models.yaml` already points to these repository-local paths
 
 ## 4. Configuration
 
@@ -122,4 +127,3 @@ python -m robot_memory_vla.app.main \
   --config-dir ./configs \
   --task "Pick up the bottle cap on the desk and place it on the pink box in the lower-right corner"
 ```
-

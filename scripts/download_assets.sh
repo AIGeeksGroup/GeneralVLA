@@ -4,12 +4,13 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PRETRAIN_DIR="$ROOT_DIR/vendor/GeneralVLA/pretrain_model"
 SEGAGENT_DIR="$PRETRAIN_DIR/segagent/zzzmmz/SegAgent-Model"
+HF_REPO_URL="https://huggingface.co/AIGeeksGroup/GeneralVLA"
 LOCAL_PRETRAIN="${GENERALVLA_PRETRAIN_SOURCE:-}"
+USED_LOCAL_PRETRAIN=0
 
-mkdir -p "$PRETRAIN_DIR"
 mkdir -p "$(dirname "$SEGAGENT_DIR")"
 
-copy_if_missing() {
+copy_tree_if_missing() {
   local src="$1"
   local dst="$2"
   if [[ -e "$dst" ]]; then
@@ -17,7 +18,7 @@ copy_if_missing() {
     return 0
   fi
   if [[ -e "$src" ]]; then
-    echo "Copying local asset: $src -> $dst"
+    echo "Copying local asset tree: $src -> $dst"
     mkdir -p "$(dirname "$dst")"
     cp -a "$src" "$dst"
     return 0
@@ -25,47 +26,34 @@ copy_if_missing() {
   return 1
 }
 
-download_with_python() {
-  local repo_id="$1"
-  local dst="$2"
-  python - <<'PY'
-import importlib.util
-import subprocess
-import sys
+if [[ -n "$LOCAL_PRETRAIN" ]]; then
+  echo "Using local asset source: $LOCAL_PRETRAIN"
+  copy_tree_if_missing "$LOCAL_PRETRAIN/LISA-7B-v1-explanatory" "$PRETRAIN_DIR/LISA-7B-v1-explanatory"
+  copy_tree_if_missing "$LOCAL_PRETRAIN/clip-vit-large-patch14" "$PRETRAIN_DIR/clip-vit-large-patch14"
+  copy_tree_if_missing "$LOCAL_PRETRAIN/segagent" "$PRETRAIN_DIR/segagent"
+  copy_tree_if_missing "$LOCAL_PRETRAIN/checkpoints" "$PRETRAIN_DIR/checkpoints"
+  if [[ -f "$LOCAL_PRETRAIN/sam_vit_h_4b8939.pth" && ! -f "$PRETRAIN_DIR/sam_vit_h_4b8939.pth" ]]; then
+    echo "Copying local asset file: $LOCAL_PRETRAIN/sam_vit_h_4b8939.pth -> $PRETRAIN_DIR/sam_vit_h_4b8939.pth"
+    mkdir -p "$PRETRAIN_DIR"
+    cp -a "$LOCAL_PRETRAIN/sam_vit_h_4b8939.pth" "$PRETRAIN_DIR/sam_vit_h_4b8939.pth"
+  fi
+  USED_LOCAL_PRETRAIN=1
+fi
 
-if importlib.util.find_spec("huggingface_hub") is None:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "huggingface_hub"])
-PY
-  python - "$repo_id" "$dst" <<'PY'
-import sys
-from huggingface_hub import snapshot_download
-
-repo_id = sys.argv[1]
-dst = sys.argv[2]
-snapshot_download(repo_id=repo_id, local_dir=dst, local_dir_use_symlinks=False)
-PY
-}
-
-copy_if_missing "${LOCAL_PRETRAIN:+$LOCAL_PRETRAIN/}LISA-7B-v1-explanatory" "$PRETRAIN_DIR/LISA-7B-v1-explanatory" || {
-  echo "Downloading LISA-7B-v1-explanatory from Hugging Face..."
-  download_with_python "xinlai/LISA-7B-v1-explanatory" "$PRETRAIN_DIR/LISA-7B-v1-explanatory"
-}
-
-copy_if_missing "${LOCAL_PRETRAIN:+$LOCAL_PRETRAIN/}clip-vit-large-patch14" "$PRETRAIN_DIR/clip-vit-large-patch14" || {
-  echo "Downloading clip-vit-large-patch14 from Hugging Face..."
-  download_with_python "openai/clip-vit-large-patch14" "$PRETRAIN_DIR/clip-vit-large-patch14"
-}
-
-copy_if_missing "${LOCAL_PRETRAIN:+$LOCAL_PRETRAIN/}segagent/zzzmmz/SegAgent-Model" "$SEGAGENT_DIR" || {
-  echo "Downloading SegAgent-Model from ModelScope..."
-  git clone https://www.modelscope.cn/zzzmmz/SegAgent-Model.git "$SEGAGENT_DIR"
-}
-
-copy_if_missing "${LOCAL_PRETRAIN:+$LOCAL_PRETRAIN/}sam_vit_h_4b8939.pth" "$PRETRAIN_DIR/sam_vit_h_4b8939.pth" || {
-  echo "Downloading SAM checkpoint..."
-  wget -O "$PRETRAIN_DIR/sam_vit_h_4b8939.pth" \
-    https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
-}
+if [[ "$USED_LOCAL_PRETRAIN" -eq 1 ]]; then
+  echo "Skip Hugging Face clone because local assets were provided."
+elif [[ ! -d "$PRETRAIN_DIR/.git" ]]; then
+  if [[ -e "$PRETRAIN_DIR" && -n "$(find "$PRETRAIN_DIR" -mindepth 1 -maxdepth 1 2>/dev/null)" ]]; then
+    echo "Expected a cloned Hugging Face repo at $PRETRAIN_DIR, but found a non-git directory."
+    echo "Remove or rename it, then rerun this script."
+    exit 1
+  fi
+  rm -rf "$PRETRAIN_DIR"
+  echo "Cloning model assets from Hugging Face..."
+  git clone "$HF_REPO_URL" "$PRETRAIN_DIR"
+else
+  echo "Skip existing Hugging Face asset repo: $PRETRAIN_DIR"
+fi
 
 if [[ ! -d "$SEGAGENT_DIR" ]]; then
   mkdir -p "$SEGAGENT_DIR"
