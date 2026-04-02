@@ -1,3 +1,14 @@
+# GeneralVLA: Generalizable Vision-Language-Action Models with Knowledge-Guided Trajectory Planning
+
+This is the official repository for the paper:
+> **GeneralVLA: Generalizable Vision-Language-Action Models with Knowledge-Guided Trajectory Planning**
+>
+> Guoqing Ma\*, Siheng Wang\*, [Zeyu Zhang](https://steve-zeyu-zhang.github.io/)\*†, Shan Yu, and [Hao Tang](https://ha0tang.github.io/)<sup>#</sup>
+>
+> \*Equal contribution. †Project lead. <sup>#</sup>Corresponding author.
+>
+> ### [Paper](https://arxiv.org/abs/2602.04315) | [Website](https://aigeeksgroup.github.io/GeneralVLA) | [Models](https://huggingface.co/AIGeeksGroup/GeneralVLA) | [HF Paper](https://huggingface.co/papers/2602.04315)
+
 ## 1. Repository Layout
 
 Key directories:
