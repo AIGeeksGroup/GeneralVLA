@@ -10,6 +10,8 @@ This is the official repository for the paper:
 > ### [Paper](https://arxiv.org/abs/2602.04315) | [Website](https://aigeeksgroup.github.io/GeneralVLA) | [Models](https://huggingface.co/AIGeeksGroup/GeneralVLA) | [HF Paper](https://huggingface.co/papers/2602.04315)
 
 
+<img width="3876" height="2003" alt="teaser_page-0001" src="https://github.com/user-attachments/assets/ef88a9d0-dad3-42b6-b98e-0c645f797005" />
+
 ## News
 - (06/16/2026) We have just released [**GeneralVLA-2**](https://github.com/AIGeeksGroup/GeneralVLA-2), have a look!
 
